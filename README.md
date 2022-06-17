@@ -10,8 +10,9 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 1. [Equipment](#Equipment)
 2. [Build Pi Zero 2](#Build-Pi-Zero-2)
 3. [Install Cloudblock](#Install-Cloudblock)
-4. [Post-install home setup](#Post-install-home-setup)
-5. Install HomeBridge (in progess)
+4. [Post-install PiHole setup](#Post-install-PiHole-setup)
+5. [Install HomeBridge](#Install-HomeBridge)
+6. Post-install HomeBridge setup (in progress)
 
 # Equipment
 
@@ -60,12 +61,13 @@ For this project, I won't be using the adapters or the header strip.
 * Prior to running the ansible step there's a few things we need to do specific to the Pi Zero 2 hardware:
   * You'll need to increase your swap memory or you'll run into errors during the install process due to limited free memory. After this, you can run the ansible playbook. To increase the swap memory:
 
-```sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
-sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
-sudo mkswap /opt/swap.file
-sudo chmod 600 /opt/swap.file
-sudo swapon /opt/swap.file
-```
+- ```sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+  sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+  sudo mkswap /opt/swap.file
+  sudo chmod 600 /opt/swap.file
+  sudo swapon /opt/swap.file
+  ```
+
 
 - After ansible completes, take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
@@ -75,13 +77,42 @@ sudo swapon /opt/swap.file
 
 * Every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
 
-# Post-install home setup
+# Post-install PiHole setup
 
 Go to your router settings, note these steps depend entirely on your router model
 
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
 - Set your primary DNS in your DHCP server settings to your Pi's local IP. Leave the secondary DNS blank.
+- I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose blocklists and whitelists options from the list.
 
 # Install HomeBridge
 
-In progress
+* Install Docker Compose `sudo apt-get -y install docker-compose`
+
+* Make a new folder for our docker compose file `mkdir /home/pi/homebridge`, and navigate to that folder `cd /home/pi/homebridge`
+
+* Create a Docker Compose file `nano docker-compose.yml`
+
+* Copy and paste the official Docker Compose Manifest from Homebridge found [here](https://github.com/homebridge/homebridge/wiki/Install-Homebridge-on-Docker#step-2-create-docker-compose-manifest), or use:
+
+* ```
+  version: '2'
+  services:
+    homebridge:
+      image: oznu/homebridge:ubuntu
+      container_name: homebridge
+      restart: always
+      network_mode: host
+      environment:
+        - HOMEBRIDGE_CONFIG_UI_PORT=8581
+      volumes:
+        - ./homebridge:/homebridge
+  ```
+
+* After pasting, press `control+x` to exit, `y` to save, then `enter` to confirm without changing the file name
+
+* Then run `sudo docker-compose up -d` to install Homebridge from the Docker Compose file.
+
+
+
+# Post-install HomeBridge setup
