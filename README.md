@@ -1,5 +1,5 @@
 # PiHole-Wireguard-and-Homebridge-on-Raspberry-Pi-Zero-2
-These are my install notes for setting up [Cloudblock](https://github.com/chadgeary/cloudblock) and [Homebridge](https://homebridge.io) docker containers on my new Raspberry Pi Zero 2w. 
+These are my install notes for setting up [Cloudblock](https://github.com/chadgeary/cloudblock) and [Homebridge](https://homebridge.io) docker containers on my new Raspberry Pi Zero 2w. Please feel free to contribute notes, suggestions, clarifications, etc. 
 
 **Cloudblock** combines PiHole (adblock) for local ad-blocking (i.e., whole-home adblocking), wireguard for remote ad-blocking (i.e., out-of-home ad-blocking; using split-tunnel DNS over VPN) and cloudflared (DNS over HTTPS) all in docker containers.
 
@@ -80,13 +80,16 @@ For this project, I won't be using the adapters or the header strip.
 
 # Post-install PiHole setup
 
-Go to your router settings, note these steps depend entirely on your router model
+- Go to your router settings, note these steps depend entirely on your own router model 
 
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
 - Set your primary DNS in your DHCP server settings to your Pi's local IP. Leave the secondary DNS blank.
+
+### (optional) Setting up adlists and whitelists
+
 - I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose blocklists and whitelists options from the list.
 
-### Setting up apps that use PiHole API token
+### (optional) Setting up apps that use PiHole API token
 
 - You can use PiHole apps (e.g., [Pi-Hole remote](https://apps.apple.com/nl/app/pi-hole-remote/id1515445551?l=en)) by selecting https://, using your [Raspbery Pi IP] and port: 443 along with your PiHole's API token. I set up two PiHoles in the app *PiHole - local* and *PiHole - remote*. To set up remote, I used https://, 172.18.0.5, and port:443
 
@@ -120,9 +123,12 @@ Go to your router settings, note these steps depend entirely on your router mode
 
 # Post-install HomeBridge setup
 
-* log-in to the Homebridge admin console by going to http://host-ip:8581. There you can monitor, Install, and configure various plugins.
-* Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
-* You can add a PiHole plugin to HomeBridge to control your PiHole. Install the plugin and enter your Pi's API Token, then select SSL, use your [Raspberry Pi IP] as the host, and Port 443
+- log-in to the Homebridge admin console by going to http://host-ip:8581. There you can monitor, Install, and configure various plugins.
+- Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
+
+### (Optional) Add the Pihole plugin to HomeBridge 
+
+- You can add a PiHole plugin to HomeBridge to control your PiHole with Siri. Install the plugin and enter your Pi's API Token, then select SSL, use your [Raspberry Pi IP] as the host, and Port 443
 
 # Updating
 
