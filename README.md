@@ -12,7 +12,7 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 3. [Install Cloudblock](#Install-Cloudblock)
 4. [Post-install PiHole setup](#PiHole-setup)
 5. [Install HomeBridge](#Install-HomeBridge)
-6. [Post-install HomeBridge setup](HomeBridge-setup)
+6. [Post-install HomeBridge setup](#HomeBridge-setup)
 7. [Updating](#Updating)
 8. [To Do](#To-Do)
 9. [Support this project](#Support-this-project)
