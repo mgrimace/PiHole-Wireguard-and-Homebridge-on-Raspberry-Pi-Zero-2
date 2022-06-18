@@ -125,7 +125,7 @@ For this project, I won't be using the adapters or the header strip.
 
 # HomeBridge setup
 
-- log-in to the Homebridge admin console by going to http://host-ip:8581. There you can monitor, Install, and configure various plugins.
+- log-in to the Homebridge admin console by going to `http://[Raspberry Pi IP]:8581`. There you can monitor, Install, and configure various plugins.
 - Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
 
 ### (Optional) Add the Pihole plugin to HomeBridge 
