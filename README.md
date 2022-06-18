@@ -10,10 +10,12 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 1. [Equipment](#Equipment)
 2. [Build Pi Zero 2](#Build-Pi-Zero-2)
 3. [Install Cloudblock](#Install-Cloudblock)
-4. [Post-install PiHole setup](#Post-install-PiHole-setup)
+4. [Post-install PiHole setup](#PiHole-setup)
 5. [Install HomeBridge](#Install-HomeBridge)
-6. [Post-install HomeBridge setup](Post-install-HomeBridge-setup)
+6. [Post-install HomeBridge setup](HomeBridge-setup)
 7. [Updating](#Updating)
+8. [To Do](#To-Do)
+9. [Support this project](#Support-this-project)
 
 # Equipment
 
@@ -78,7 +80,7 @@ For this project, I won't be using the adapters or the header strip.
 
 * Every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
 
-# Post-install PiHole setup
+# PiHole setup
 
 - Go to your router settings, note these steps depend entirely on your own router model 
 
@@ -121,7 +123,7 @@ For this project, I won't be using the adapters or the header strip.
 
 * Then run `sudo docker-compose up -d` to install Homebridge from the Docker Compose file.
 
-# Post-install HomeBridge setup
+# HomeBridge setup
 
 - log-in to the Homebridge admin console by going to http://host-ip:8581. There you can monitor, Install, and configure various plugins.
 - Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
