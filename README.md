@@ -50,10 +50,31 @@ For this project, I won't be using the adapters or the header strip.
 
 ## Connect to Pi
 
-* Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter.
-* Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
-* I used my wireless router settings to reserve its IP address (i.e., so it doesn't change the IP on me)
-* Open Terminal and SSH in using `ssh pi@rasberrypi.local` if you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
+- Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter.
+- Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
+- I used my wireless router settings to reserve its IP address (i.e., so it doesn't change the IP on me)
+- Open Terminal and SSH in using `ssh pi@rasberrypi.local` if you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
+
+### (Optional) Add another device that can log-in to the Pi
+
+1. On your other computer that you want to also be able to log into the Pi from, open terminal and use `ssh-keygen -t rsa` to create a new SSH key pair. Alternatively, use one you already have.
+2. Copy the contents of the public key using `cat ~/id_rsa.pub`
+3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized.keys`. 
+4. Alternatively, use a text-editor like `nano ~/.ssh/authorized.keys` and paste your public key content to a new line in that file. If you're working with nano, press `esc` then `$` to wrap long strings of text (like these keys) to make it easy to read. Then hit `control + x` then `y` then `enter` to save your changes.
+5. Log out using your old device
+6. Log in using your new device, assuming you're using the defaults, you should be able to log-in using `ssh pi@raspberrypi.local` or `ssh -i ~/.ssh/[key name] [username]@[raspberry pi ip]` if you're not using defaults keys and/or user names
+7. Repeat steps 1-6 on any other devices you want to add
+
+### (Optional) Create a host file to make it easier to log in if you're not using default keys
+
+- If you're not using the default key name of `id_rsa` (e.g., you created your own name), make a file called `config` in your ~/.ssh/ directory and include the following
+
+- ```
+  Host [Raspberry Pi IP]
+  IndentityFile ~/.ssh/[key name]
+  ```
+
+- This will allow you to connect to your Pi in Terminal by just using `ssh [username]@[raspberry pi ip]`. If you skip this step, you'll need to specify the name of your key file every time you connect, as in: `ssh -i ~/.ssh/[key name] [username]@raspberry pi ip]`
 
 # Install Cloudblock
 
