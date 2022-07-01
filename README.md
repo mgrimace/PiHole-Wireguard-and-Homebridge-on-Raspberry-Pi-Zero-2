@@ -9,13 +9,14 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 
 1. [Equipment](#Equipment)
 2. [Build Pi Zero 2](#Build-Pi-Zero-2)
-3. [Install Cloudblock](#Install-Cloudblock)
-4. [Post-install PiHole setup](#PiHole-setup)
-5. [Install HomeBridge](#Install-HomeBridge)
-6. [Post-install HomeBridge setup](#HomeBridge-setup)
-7. [Updating](#Updating)
-8. [To Do](#To-Do)
-9. [Support this project](#Support-this-project)
+3. [Setup the Pi](#Setup-the-Pi)
+4. [Install Cloudblock](#Install-Cloudblock)
+5. [Post-install PiHole setup](#PiHole-setup)
+6. [Install HomeBridge](#Install-HomeBridge)
+7. [Post-install HomeBridge setup](#HomeBridge-setup)
+8. [Updating](#Updating)
+9. [To Do](#To-Do)
+10. [Support this project](#Support-this-project)
 
 # Equipment
 
@@ -48,24 +49,46 @@ For this project, I won't be using the adapters or the header strip.
   * **Set-up wifi:** Set wifi SSID and password
 * Write the SD card
 
-## Connect to Pi
+# Setup the Pi
+
+## Connect to the Pi
 
 - Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter.
 - Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
 - I used my wireless router settings to reserve its IP address (i.e., so it doesn't change the IP on me)
 - Open Terminal and SSH in using `ssh pi@rasberrypi.local` if you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
 
-### (Optional) Add another device that can log-in to the Pi
+## Increase the Pi's memory
+
+Prior to running ansible as part of installing Cloudblock, we need to increase the available memory or we run into errors during the install process due to limited free memory on the Pi Zero 2. There are two ways to do this, I've tested both and I'm using ZRam currently:
+
+### Option 1 - enable ZRam
+
+- [Zram](https://www.kernel.org/doc/Documentation/blockdev/zram.txt**) creates compressed RAM based block storage. This compression allows additional memory inside RAM in exchange for the processing power used for compression. This has the benefit of being faster than using the SD card for swap memory.
+- To enable, use `sudo apt install zram-tools` 
+
+### Option 2 - increase the swap memory
+
+- Increasing the swap memory designates a portion of the SD card to act as memory. Using the SD card as memory is slow but reliable. To increase the swap memory:
+
+- ```sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+  sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+  sudo mkswap /opt/swap.file
+  sudo chmod 600 /opt/swap.file
+  sudo swapon /opt/swap.file
+  ```
+
+## (Optional) Add another device that can log-in to the Pi
 
 1. On your other computer that you want to also be able to log into the Pi from, open terminal and use `ssh-keygen -t rsa` to create a new SSH key pair. Alternatively, use one you already have.
 2. Copy the contents of the public key using `cat ~/id_rsa.pub`
-3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized.keys`. 
+3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized.keys`.  If that doesn't work, try `authorized_keys`
 4. Alternatively, use a text-editor like `nano ~/.ssh/authorized.keys` and paste your public key content to a new line in that file. If you're working with nano, press `esc` then `$` to wrap long strings of text (like these keys) to make it easy to read. Then hit `control + x` then `y` then `enter` to save your changes.
 5. Log out using your old device
 6. Log in using your new device, assuming you're using the defaults, you should be able to log-in using `ssh pi@raspberrypi.local` or `ssh -i ~/.ssh/[key name] [username]@[raspberry pi ip]` if you're not using defaults keys and/or user names
 7. Repeat steps 1-6 on any other devices you want to add
 
-### (Optional) Create a host file to make it easier to log in if you're not using default keys
+## (Optional) Create a host file to make it easier to log in if you're not using default keys
 
 - If you're not using the default key name of `id_rsa` (e.g., you created your own name), make a file called `config` in your ~/.ssh/ directory and include the following
 
@@ -82,24 +105,15 @@ For this project, I won't be using the adapters or the header strip.
   * At the #Set Variables step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality)
   * Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
 
-* Prior to running the ansible step there's a few things we need to do specific to the Pi Zero 2 hardware:
-  * You'll need to increase your swap memory or you'll run into errors during the install process due to limited free memory. After this, you can run the ansible playbook. To increase the swap memory:
-
-- ```sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
-  sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
-  sudo mkswap /opt/swap.file
-  sudo chmod 600 /opt/swap.file
-  sudo swapon /opt/swap.file
-  ```
-
 
 - After ansible completes, take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
-- To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]` For example, I saved them to a folder called RPi in My Documents using: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ ~/Documents/RPi`
+- To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]` For example, I saved them to a folder called RPi in My Documents using: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ ~/Documents/pihole_configs`
 
 ## Troubleshooting Cloudblock setup
 
-* Every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
+* If you are using swap: Every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
+* If you reboot by pulling the power cord or by losing power, Cloublock and Wireguard to do not seem to startup properly. To fix this, use `sudo reboot` and it should start back up. 
 
 # PiHole setup
 
@@ -108,11 +122,11 @@ For this project, I won't be using the adapters or the header strip.
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
 - Set your primary DNS in your DHCP server settings to your Pi's local IP. Leave the secondary DNS blank.
 
-### (optional) Setting up adlists and whitelists
+## (optional) Setting up adlists and whitelists
 
 - I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose blocklists and whitelists options from the list.
 
-### (optional) Setting up apps that use PiHole API token
+## (optional) Setting up apps that use PiHole API token
 
 - You can use PiHole apps (e.g., [Pi-Hole remote](https://apps.apple.com/nl/app/pi-hole-remote/id1515445551?l=en)) by selecting https://, using your [Raspbery Pi IP] and port: 443 along with your PiHole's API token. I set up two PiHoles in the app *PiHole - local* and *PiHole - remote*. To set up remote, I used https://, 172.18.0.5, and port:443
 
@@ -149,7 +163,7 @@ For this project, I won't be using the adapters or the header strip.
 - log-in to the Homebridge admin console by going to `http://[Raspberry Pi IP]:8581`. There you can monitor, Install, and configure various plugins.
 - Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
 
-### (Optional) Add the Pihole plugin to HomeBridge 
+## (Optional) Add the Pihole plugin to HomeBridge 
 
 - You can add a PiHole plugin to HomeBridge to control your PiHole with Siri. Install the plugin and enter your Pi's API Token, then select SSL, use your [Raspberry Pi IP] as the host, and Port 443
 
@@ -191,8 +205,17 @@ docker-compose pull
 docker-compose up -d
 ```
 
+# Useful commands
+
+- `sudo  reboot` #to reboot pi
+- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too high (>55 C).
+- `ssh-keygen -R raspberrypi.local` #If re-create your SD card using your previous/existing keys, you’ll have to delete your fingerprint using this command and generate a new one. If you do so, run this on your home machine prior to ssh.
+- `sudo docker ps` #this will show you what docker containers are running. 
+- `sudo docker system prune` #If there were errors/issues during the setup, this will tidy up half-installed, empty, incomplete docker containers. 
+
 # To Do
 
+* Testing 32-bit vs 64-bit memory use 
 * Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
 
 # Support this project
