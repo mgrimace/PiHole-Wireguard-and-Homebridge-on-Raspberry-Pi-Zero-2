@@ -43,7 +43,8 @@ For this project, I won't be using the adapters or the header strip.
 ## Get the SD card ready
 
 * Go to [raspberrypi.com](raspberrypi.com) and download and install the Raspberry Pi Imager. I'm using a Mac for this install
-* I selected Raspberry Pi OS **Lite** **64-bit** by going to "other" section. Before continuing, select advanced options
+* I selected Raspberry Pi OS **Lite** **32-bit** by going to "other" section. Note, I tested both 32-bit and 64-bit and dont' see much difference in speed or memory use. There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this.
+* Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only, and left the default/prefilled option for set authorized_keys for 'pi'. This automatically creates the required authorization keys. That means I don't have to use a password when connecting to my Pi from this computer
   * Set username and password
   * **Set-up wifi:** Set wifi SSID and password
@@ -56,7 +57,7 @@ For this project, I won't be using the adapters or the header strip.
 - Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter.
 - Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
 - I used my wireless router settings to reserve its IP address (i.e., so it doesn't change the IP on me)
-- Open Terminal and SSH in using `ssh pi@rasberrypi.local` if you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
+- Open Terminal and SSH to it by typing or copying `ssh pi@rasberrypi.local`. If you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
 
 ## Increase the Pi's memory
 
