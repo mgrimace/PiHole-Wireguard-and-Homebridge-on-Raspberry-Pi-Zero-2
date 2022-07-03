@@ -43,7 +43,8 @@ For this project, I won't be using the adapters or the header strip.
 ## Get the SD card ready
 
 * Go to [raspberrypi.com](raspberrypi.com) and download and install the Raspberry Pi Imager. I'm using a Mac for this install
-* I selected Raspberry Pi OS **Lite** **32-bit** by going to "other" section. Note, I tested both 32-bit and 64-bit and dont' see much difference in speed or memory use. There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this.
+* I selected Raspberry Pi OS **Lite** **32-bit** by going to "other" section. Note, I tested both 32-bit and 64-bit and don't see much difference in speed or memory use, feel free to use Lite 64-bit if you prefer. 
+* **(Optional) additional reading:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this.
 * Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only, and left the default/prefilled option for set authorized_keys for 'pi'. This automatically creates the required authorization keys. That means I don't have to use a password when connecting to my Pi from this computer
   * Set username and password
@@ -54,9 +55,9 @@ For this project, I won't be using the adapters or the header strip.
 
 ## Connect to the Pi
 
-- Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter.
+- Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter using the right-most slot
 - Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
-- I used my wireless router settings to reserve its IP address (i.e., so it doesn't change the IP on me)
+- **(Recommended) Set a static IP for the Pi** I used my wireless router settings to reserve its IP address (i.e., so the Pi doesn't change its IP on me)
 - Open Terminal and SSH to it by typing or copying `ssh pi@rasberrypi.local`. If you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
 
 ## Increase the Pi's memory
@@ -83,8 +84,8 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 1. On your other computer that you want to also be able to log into the Pi from, open terminal and use `ssh-keygen -t rsa` to create a new SSH key pair. Alternatively, use one you already have.
 2. Copy the contents of the public key using `cat ~/id_rsa.pub`
-3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized.keys`.  If that doesn't work, try `authorized_keys`
-4. Alternatively, use a text-editor like `nano ~/.ssh/authorized.keys` and paste your public key content to a new line in that file. If you're working with nano, press `esc` then `$` to wrap long strings of text (like these keys) to make it easy to read. Then hit `control + x` then `y` then `enter` to save your changes.
+3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized_keys`. 
+4. Alternatively, use a text-editor like `nano ~/.ssh/authorized_keys` and paste your public key content to a new line in that file. If you're working with nano, press `esc` then `$` to wrap long strings of text (like these keys) to make it easy to read. Then hit `control + x` then `y` then `enter` to save your changes.
 5. Log out using your old device
 6. Log in using your new device, assuming you're using the defaults, you should be able to log-in using `ssh pi@raspberrypi.local` or `ssh -i ~/.ssh/[key name] [username]@[raspberry pi ip]` if you're not using defaults keys and/or user names
 7. Repeat steps 1-6 on any other devices you want to add
