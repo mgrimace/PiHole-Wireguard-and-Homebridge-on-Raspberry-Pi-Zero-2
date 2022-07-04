@@ -15,8 +15,9 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 6. [Install HomeBridge](#Install-HomeBridge)
 7. [Post-install HomeBridge setup](#HomeBridge-setup)
 8. [Updating the apps](#Updating-the-apps)
-9. [To Do](#To-Do)
-10. [Support this project](#Support-this-project)
+9. [Useful commands](#Useful-commands)
+10. [To Do](#To-Do)
+11. [Support this project](#Support-this-project)
 
 # Equipment
 
@@ -156,6 +157,8 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 * Install Docker Compose `sudo apt-get -y install docker-compose`
 
+* Reboot now using `sudo reboot`, then reconnect using `ssh pi@raspberrypi.local`. 
+
 * Make a new folder for our docker compose file `mkdir /home/pi/homebridge`, and navigate to that folder `cd /home/pi/homebridge`
 
 * Create a Docker Compose file `nano docker-compose.yml`
@@ -178,7 +181,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 * After pasting, press `control+x` to exit, `y` to save, then `enter` to confirm without changing the file name
 
-* Then run `sudo docker-compose up -d` to install Homebridge from the Docker Compose file.
+* Then run `sudo docker-compose up -d` to install Homebridge from the Docker Compose file. 
 
 # HomeBridge setup
 
@@ -229,6 +232,8 @@ docker-compose up -d
 
 # Useful commands
 
+These are some useful commands I've come across in my learning and testing
+
 - `sudo  reboot` #to reboot pi
 - `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too high (>55 C).
 - `ssh-keygen -R raspberrypi.local` #If re-create your SD card using your previous/existing keys, you’ll have to delete your fingerprint using this command and generate a new one. If you do so, run this on your home machine prior to ssh.
@@ -237,9 +242,8 @@ docker-compose up -d
 
 # To Do
 
-* **Currently:** Testing 32-bit vs., 64-bit OS memory use
-* **Currently:** testing additional Zram config options posted as optional steps above (i.e., to increase swappiness)
-* **Not sure:** Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
+* Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
+* Add pictures to guide
 
 # Support this project
 
