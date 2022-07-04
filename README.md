@@ -14,7 +14,7 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 5. [Post-install PiHole setup](#PiHole-setup)
 6. [Install HomeBridge](#Install-HomeBridge)
 7. [Post-install HomeBridge setup](#HomeBridge-setup)
-8. [Updating](#Updating)
+8. [Updating the apps](#Updating-the-apps)
 9. [To Do](#To-Do)
 10. [Support this project](#Support-this-project)
 
@@ -28,7 +28,7 @@ I purchased a Raspberry Pi Zero 2 Starter kit, which included:
 - USB OTG Cable
 - 32GB Class 10 SD Card - blank
 - 5.1V 2.5A Power Supply
-- 2x20 Male Header Strip A small extra if you decide to tinker with the GPIO outside of the case. Solder this on and you can plug in Pi HATs, GPIO cables, etc, just as you would on a normal Pi!
+- 2x20 Male Header Strip 
 - Set of two heatsinks
 
 For this project, I won't be using the adapters or the header strip.
@@ -44,7 +44,8 @@ For this project, I won't be using the adapters or the header strip.
 
 * Go to [raspberrypi.com](raspberrypi.com) and download and install the Raspberry Pi Imager. I'm using a Mac for this install
 * I selected Raspberry Pi OS **Lite** **32-bit** by going to "other" section. Note, I tested both 32-bit and 64-bit and don't see much difference in speed or memory use, feel free to use Lite 64-bit if you prefer. 
-* **(Optional) additional reading:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this.
+  * **(Optional) additional reading:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this.
+
 * Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only, and left the default/prefilled option for set authorized_keys for 'pi'. This automatically creates the required authorization keys. That means I don't have to use a password when connecting to my Pi from this computer
   * Set username and password
@@ -55,10 +56,10 @@ For this project, I won't be using the adapters or the header strip.
 
 ## Connect to the Pi
 
-- Insert the SD card, snap on the lid, and plug your Pi in to the A/C adapter using the right-most slot
+- Insert the SD card into the Pi, snap on the lid, and plug your Pi in to the A/C adapter using the right-most slot
 - Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
 - **(Recommended) Set a static IP for the Pi** I used my wireless router settings to reserve its IP address (i.e., so the Pi doesn't change its IP on me)
-- Open Terminal and SSH to it by typing or copying `ssh pi@rasberrypi.local`. If you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
+- Open Terminal and connect to it remotely by using SSH. To do so type or copy/paste `ssh pi@rasberrypi.local`. If you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
 
 ## Increase the Pi's memory
 
@@ -68,6 +69,22 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 - [Zram](https://www.kernel.org/doc/Documentation/blockdev/zram.txt**) creates compressed RAM based block storage. This compression allows additional memory inside RAM in exchange for the processing power used for compression. This has the benefit of being faster than using the SD card for swap memory.
 - To enable, use `sudo apt install zram-tools` 
+- **(optional)** increase Pi's tendency to use swap now that we are using Zram (for more information, see [source](https://haydenjames.io/raspberry-pi-performance-add-zram-kernel-parameters/) for more details). 
+
+  * Use `sudo nano /etc/sysctl.conf` to add the following to the end of your **/etc/sysctl.conf** file:
+
+    ```
+    vm.vfs_cache_pressure=500
+    vm.swappiness=100
+    vm.dirty_background_ratio=1
+    vm.dirty_ratio=50
+    ```
+
+    Then enable with:
+
+    ```
+    sudo sysctl --system
+    ```
 
 ### Option 2 - increase the swap memory
 
@@ -92,7 +109,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 ## (Optional) Create a host file to make it easier to log in if you're not using default keys
 
-- If you're not using the default key name of `id_rsa` (e.g., you created your own name), make a file called `config` in your ~/.ssh/ directory and include the following
+- If you're not using the default key name of `id_rsa` (e.g., you created your own name), make a file called `config` in your home computer's ~/.ssh/ directory and include the following
 
 - ```
   Host [Raspberry Pi IP]
@@ -110,11 +127,14 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 - After ansible completes, take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
-- To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]` For example, I saved them to a folder called RPi in My Documents using: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ ~/Documents/pihole_configs`
+- To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
+
+  -  For example, I saved them to a folder called RPi in My Documents using: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ ~/Documents/pihole_configs`
+
 
 ## Troubleshooting Cloudblock setup
 
-* If you are using swap: Every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
+* If you are using regular swap: every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
 * If you reboot by pulling the power cord or by losing power, Cloublock and Wireguard to do not seem to startup properly. To fix this, use `sudo reboot` and it should start back up. 
 
 # PiHole setup
@@ -122,11 +142,11 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 - Go to your router settings, note these steps depend entirely on your own router model 
 
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
-- Set your primary DNS in your DHCP server settings to your Pi's local IP. Leave the secondary DNS blank.
+- Set your primary DNS in your DHCP server settings to your Pi's local IP. **Leave the secondary DNS blank.** 
 
 ## (optional) Setting up adlists and whitelists
 
-- I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose blocklists and whitelists options from the list.
+- I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose the blocklists and whitelists options from the list that appeal to you.
 
 ## (optional) Setting up apps that use PiHole API token
 
@@ -162,14 +182,14 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 # HomeBridge setup
 
-- log-in to the Homebridge admin console by going to `http://[Raspberry Pi IP]:8581`. There you can monitor, Install, and configure various plugins.
+- log-in to the Homebridge admin console by going to `http://[Raspberry Pi IP]:8581`. There you can monitor, install, and configure various plugins.
 - Add `172.18.0.1/32` to your allowed IPS in your client configs to connect to HomeBridge over wireguard (i.e., to connect remotely when out-of-home)
 
 ## (Optional) Add the Pihole plugin to HomeBridge 
 
 - You can add a PiHole plugin to HomeBridge to control your PiHole with Siri. Install the plugin and enter your Pi's API Token, then select SSL, use your [Raspberry Pi IP] as the host, and Port 443
 
-# Updating
+# Updating the apps
 
 ## Cloudblock
 
@@ -217,8 +237,9 @@ docker-compose up -d
 
 # To Do
 
-* Testing 32-bit vs 64-bit memory use 
-* Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
+* **Currently:** Testing 32-bit vs., 64-bit OS memory use
+* **Currently:** testing additional Zram config options posted as optional steps above (i.e., to increase swappiness)
+* **Not sure:** Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
 
 # Support this project
 
