@@ -130,7 +130,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
 - To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
 
-  -  For example, I saved them to a folder called RPi in My Documents using: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ ~/Documents/pihole_configs`
+  -  For example, I saved them to a folder called RPi in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
 
 
 ## Troubleshooting Cloudblock setup
