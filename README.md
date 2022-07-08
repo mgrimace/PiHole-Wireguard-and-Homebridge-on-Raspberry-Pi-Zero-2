@@ -196,6 +196,10 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 ## Cloudblock
 
+- Be sure to run `sudo apt update && sudo apt -y upgrade` first to update your Raspberry Pi. `sudo reboot`
+- Then, remove your Pi-Hole's DNS from your router settings (so you still temporarily still have internet once you remove the old containers). 
+- Then run the following:
+
 ```# Be in the cloudblock/playbooks directory
 cd ~/cloudblock/playbooks
 
@@ -221,6 +225,8 @@ sudo docker rm -f cloudflared_doh pihole web_proxy wireguard
 # Rerun ansible-playbook
 ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network"
 ```
+
+Once Pi-Hole is successfullly updated, you can re-enter it's IP to your router's DNS settings (I do this in DHCP)
 
 ## Homebridge
 
