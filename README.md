@@ -200,7 +200,8 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 - Then, remove your Pi-Hole's DNS from your router settings (so you still temporarily still have internet once you remove the old containers). 
 - Then run the following:
 
-```# Be in the cloudblock/playbooks directory
+```bash
+# Be in the cloudblock/playbooks directory
 cd ~/cloudblock/playbooks
 
 # Pull cloudblock code updates
