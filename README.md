@@ -74,7 +74,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
   * Use `sudo nano /etc/sysctl.conf` to add the following to the end of your **/etc/sysctl.conf** file:
 
-    ```
+    ```bash
     vm.vfs_cache_pressure=500
     vm.swappiness=100
     vm.dirty_background_ratio=1
@@ -83,7 +83,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
     Then enable with:
 
-    ```
+    ```bash
     sudo sysctl --system
     ```
 
@@ -91,7 +91,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 - Increasing the swap memory designates a portion of the SD card to act as memory. Using the SD card as memory is slow but reliable. To increase the swap memory:
 
-- ```sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+- ```bash
   sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
   sudo mkswap /opt/swap.file
   sudo chmod 600 /opt/swap.file
@@ -112,7 +112,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 - If you're not using the default key name of `id_rsa` (e.g., you created your own name), make a file called `config` in your home computer's ~/.ssh/ directory and include the following
 
-- ```
+- ```bash
   Host [Raspberry Pi IP]
   IndentityFile ~/.ssh/[key name]
   ```
@@ -165,7 +165,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 * Copy and paste the official Docker Compose Manifest from Homebridge found [here](https://github.com/homebridge/homebridge/wiki/Install-Homebridge-on-Docker#step-2-create-docker-compose-manifest), or use:
 
-* ```
+* ```dockerfile
   version: '2'
   services:
     homebridge:
@@ -231,7 +231,7 @@ Once Pi-Hole is successfullly updated, you can re-enter it's IP to your router's
 
 ## Homebridge
 
-```
+```bash
 # run these commands from the same directory you created the docker-compose.yml file in
 docker-compose pull
 docker-compose up -d
