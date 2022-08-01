@@ -101,8 +101,8 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 ## (Optional) Add another device that can log-in to the Pi
 
 1. On your other computer that you want to also be able to log into the Pi from, open terminal and use `ssh-keygen -t rsa` to create a new SSH key pair. Alternatively, use one you already have.
-2. Copy the contents of the public key using `cat ~/id_rsa.pub`
-3. Login to the Pi using your working device, then use `echo [pate public key content here] >> ~/.ssh/authorized_keys`. 
+2. Copy the contents of the public key using `cat ~/.ssh/id_rsa.pub`
+3. Login to the Pi using your working device, then use `echo [paste public key content here] >> ~/.ssh/authorized_keys`. 
 4. Alternatively, use a text-editor like `nano ~/.ssh/authorized_keys` and paste your public key content to a new line in that file. If you're working with nano, press `esc` then `$` to wrap long strings of text (like these keys) to make it easy to read. Then hit `control + x` then `y` then `enter` to save your changes.
 5. Log out using your old device
 6. Log in using your new device, assuming you're using the defaults, you should be able to log-in using `ssh pi@raspberrypi.local` or `ssh -i ~/.ssh/[key name] [username]@[raspberry pi ip]` if you're not using defaults keys and/or user names
