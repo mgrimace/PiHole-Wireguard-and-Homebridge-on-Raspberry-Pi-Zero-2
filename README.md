@@ -132,7 +132,7 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 ### Important additional step
 
- Since the Raspberry Pi's DHCP server (my router) points to the PiHole container, I need to esnure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
+Since the Raspberry Pi's DHCP server (my router) points to the PiHole container, I need to ensure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
 
 ```bash
 # If the Raspberry Pi's DHCP server points to the Pihole container, ensure the Raspberry Pi's host DNS is not set via DHCP, e.g.:
