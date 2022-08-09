@@ -125,18 +125,37 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
   * At the #Set Variables step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality)
   * Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
 
-
 - After ansible completes, take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
 - To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
+- For example, I saved them to a folder called pihole_configs in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
 
-  -  For example, I saved them to a folder called pihole_configs in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
+### Important additional step
+
+ Since the Raspberry Pi's DHCP server (my router) points to the PiHole container, I need to esnure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
+
+```bash
+# If the Raspberry Pi's DHCP server points to the Pihole container, ensure the Raspberry Pi's host DNS is not set via DHCP, e.g.:
+# backup DHCP client conf
+sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.$(date +%F_%T)
+
+# Disable DNS via DHCP
+sudo sed -i 's/option domain_name_servers, domain_name, domain_search, host_name/option domain_name, domain_search, host_name/' /etc/dhcpcd.conf
+
+# Set a hardcoded DNS server IP - replace 1.1.1.1 with your choice of DNS.
+sudo sed -i '0,/#static domain_name_servers=.*/s//static domain_name_servers=1.1.1.1/' /etc/dhcpcd.conf
+
+# if Raspberry Pi is wireless, disconnect/reconnect link
+sudo bash -c 'ip link set wlan0 down && ip link set wlan0 up' &
+```
+
 
 
 ## Troubleshooting Cloudblock setup
 
 * If you are using regular swap: every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
 * If you reboot by pulling the power cord or by losing power, Cloublock and Wireguard to do not seem to startup properly. To fix this, use `sudo reboot` and it should start back up. 
+* After updating the Raspberry Pi and/or rebooting, I ran into an issue where everything was working (e.g., PiHole, etc.) but my devices were not able to access the internet. This is an issue with cloudflared_doh (see this [issues](https://github.com/cloudflare/cloudflared/issues/23#issuecomment-1161211222) thread), and restarting it manually fixed the problem. To do so, use: `sudo docker restart cloudflared_doh`. However, I have now added an additional step above to hopefully prevent this from happening.
 
 # PiHole setup
 
