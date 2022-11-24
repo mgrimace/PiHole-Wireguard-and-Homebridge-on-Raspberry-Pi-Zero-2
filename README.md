@@ -243,7 +243,7 @@ wireguard_network=172.19.0.0
 sudo docker rm -f cloudflared_doh pihole web_proxy wireguard
 
 # Rerun ansible-playbook
-ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network"
+ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
 ```
 
 Once Pi-Hole is successfullly updated, you can re-enter it's IP to your router's DNS settings (I do this in DHCP)
@@ -260,6 +260,7 @@ docker-compose up -d
 
 These are some useful commands I've come across in my learning and testing
 
+- `sudo docker exec pihole pihole updateGravity` update gravity database 
 - `sudo  reboot` #to reboot pi
 - `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too high (>55 C).
 - `ssh-keygen -R raspberrypi.local` #If re-create your SD card using your previous/existing keys, you’ll have to delete your fingerprint using this command and generate a new one. If you do so, run this on your home machine prior to ssh.
