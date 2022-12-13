@@ -12,13 +12,15 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 3. [Setup the Pi](#Setup-the-Pi)
 4. [Install Cloudblock](#Install-Cloudblock)
 5. [Post-install PiHole setup](#PiHole-setup)
-6. [Install HomeBridge](#Install-HomeBridge)
-7. [Post-install HomeBridge setup](#HomeBridge-setup)
-8. [Updating the apps](#Updating-the-apps)
-9. [Useful commands](#Useful-commands)
-10. [Pihole addons](#Pihole-Addons)
-11. [To Do](#To-Do)
-12. [Support this project](#Support-this-project)
+6. [Pihole addons](#Pihole-Addons)
+   1. Easily add adlists and whitelists
+   2. Set up apps that use PiHole API token
+   3. Use the list tool to check which lists you're actually using
+7. [Install HomeBridge](#Install-HomeBridge)
+8. [Post-install HomeBridge setup](#HomeBridge-setup)
+9. [Updating Pihole and Homebridge](#Updating-the-apps)
+10. [Useful commands](#Useful-commands)
+11. [Support this project](#Support-this-project)
 
 # Equipment
 
@@ -165,6 +167,30 @@ sudo bash -c 'ip link set wlan0 down && ip link set wlan0 up' &
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
 - Set your primary DNS in your DHCP server settings to your Pi's local IP. **Leave the secondary DNS blank.** 
 
+# Pihole Addons
+
+## Easily add adlists and whitelists
+
+I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose the blocklists and whitelists options from the list that appeal to you.
+
+## Set up apps that use PiHole API token
+
+You can use PiHole apps (e.g., [Pi-Hole remote](https://apps.apple.com/nl/app/pi-hole-remote/id1515445551?l=en)) by selecting https://, using your [Raspbery Pi IP] and port: 443 along with your PiHole's API token. I set up two PiHoles in the app *PiHole - local* and *PiHole - remote*. To set up remote, I used https://, 172.18.0.5, and port:443
+
+## Use the list tool to check which lists you're actually using
+
+The [Pihole Adlist Tool](https://github.com/yubiuser/pihole_adlist_tool) is a script that will analyze 30 days worth of adblocking to see which lists you're actually using. After running the script, it can automatically disable any lists that aren't being used. To run it, ssh into your PiHole then run:
+
+```bash
+ wget https://github.com/yubiuser/pihole_adlist_tool/archive/refs/tags/2.6.3.zip
+ unzip 2.6.3.zip
+ rm -r 2.6.3.zip
+ cd pihole_adlist_tool-2.6.3
+ sudo ./pihole_adlist_tool
+```
+
+Then follow the prompts, noting that it may take some time to run. **Note** that you might want to check for the latest release of the tool, as v2.6.3 might be out of date when you read this.
+
 # Install HomeBridge
 
 * Install Docker Compose `sudo apt-get -y install docker-compose`
@@ -259,37 +285,6 @@ These are some useful commands I've come across in my learning and testing
 - `ssh-keygen -R raspberrypi.local` #If re-create your SD card using your previous/existing keys, you’ll have to delete your fingerprint using this command and generate a new one. If you do so, run this on your home machine prior to ssh.
 - `sudo docker ps` #this will show you what docker containers are running. 
 - `sudo docker system prune -a -f` #If there were errors/issues during the setup, this will tidy up half-installed, empty, incomplete docker containers. Useful to run after a few updates.
-
-# Pihole Addons
-
-## Easily add adlists and whitelists
-
-I like the [pihole list tool](https://github.com/jessedp/pihole5-list-tool) for adding adlists and whitelists, you can install it by SSH back to your Pi, then running `sudo pip3 install pihole5-list-tool --upgrade` . Select the Docker version once it launches, then choose the blocklists and whitelists options from the list that appeal to you.
-
-## Set up apps that use PiHole API token
-
-You can use PiHole apps (e.g., [Pi-Hole remote](https://apps.apple.com/nl/app/pi-hole-remote/id1515445551?l=en)) by selecting https://, using your [Raspbery Pi IP] and port: 443 along with your PiHole's API token. I set up two PiHoles in the app *PiHole - local* and *PiHole - remote*. To set up remote, I used https://, 172.18.0.5, and port:443
-
-## Use the list tool to check which lists you're actually using
-
-The [Pihole Adlist Tool](https://github.com/yubiuser/pihole_adlist_tool) is a script that will analyze 30 days worth of adblocking to see which lists you're actually using. After running the script, it can automatically disable any lists that aren't being used. To run it, ssh into your PiHole then run:
-
-```bash
- wget https://github.com/yubiuser/pihole_adlist_tool/archive/refs/tags/2.6.3.zip
- unzip 2.6.3.zip
- rm -r 2.6.3.zip
- cd pihole_adlist_tool-2.6.3
- sudo ./pihole_adlist_tool
-```
-
-Then follow the prompts, noting that it may take some time to run. 
-
-**Note** that you might want to check for the latest release of the tool, as v2.6.3 might be out of date when you read this
-
-# To Do
-
-* Figure out how to pass bluetooth to homebridge docker container to control bluetooth devices on the home network.
-* Add pictures to guide
 
 # Support this project
 
