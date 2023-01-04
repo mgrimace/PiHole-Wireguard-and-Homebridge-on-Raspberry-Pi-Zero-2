@@ -170,17 +170,19 @@ ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provide
 # See Playbook Summary output for Pihole WebUI URL and Wireguard Client files
 ```
 
-* **Optional**: At the `# Set Variables` step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality). You can do this by adding the line `wireguard_hostname=[your personal DDNS address]`
 * Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
 
 - After ansible completes, **take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files**. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
-- Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
+
+## Setup devices with Wireguard profiles
+
+- Use the Wireguard QR codes that were generated to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
 - To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
 - For example, I saved them to a folder called pihole_configs in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
 
-### Important additional step
+## Important step to prevent a non-working loop
 
-Since the Raspberry Pi's DHCP server (my router) points to the PiHole container, I need to ensure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
+Since the Raspberry Pi's DHCP server (my router) points to the PiHole container for DNS, I need to ensure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
 
 ```bash
 # If the Raspberry Pi's DHCP server points to the Pihole container, ensure the Raspberry Pi's host DNS is not set via DHCP, e.g.:
