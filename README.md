@@ -121,57 +121,57 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 # Install Cloudblock
 
-* Follow the local deployment, raspbian guide here: https://github.com/chadgeary/cloudblock/tree/master/playbooks#raspbian-deployment, for support join their [Discord](https://discord.gg/zmu6GVnPnj), and check out the [video tutorial](https://youtu.be/9oeQZvltWDc):
-  
-* ```bash
-  # Ansible + Git
-  sudo apt update && sudo apt -y upgrade
-  sudo apt install git python3-pip
-  pip3 install --user --upgrade ansible
-  
-  # Add .local/bin to $PATH
-  echo PATH="\$PATH:~/.local/bin" >> .bashrc
-  source ~/.bashrc
-  
-  # Install the community ansible collection
-  ansible-galaxy collection install community.general
-  
-  # Optionally, reboot the raspberry pi
-  # This may be required if the system was months out date before installing updates!
-  sudo reboot
-  
-  # Clone the cloudblock project and change to playbooks directory
-  git clone https://github.com/chadgeary/cloudblock && cd cloudblock/playbooks/
-  
-  # Set Variables
-  doh_provider=opendns
-  dns_novpn=1
-  wireguard_peers=10
-  vpn_traffic=dns
-  docker_network=172.18.0.0
-  docker_gw=172.18.0.1
-  docker_doh=172.18.0.2
-  docker_pihole=172.18.0.3
-  docker_wireguard=172.18.0.4
-  docker_webproxy=172.18.0.5
-  wireguard_network=172.19.0.0
-  
-  # Optional (e.g. your DDNS hostname)
-  wireguard_hostname=example.com
-  
-  # Want to set your own pihole password instead of something randomly generated?
-  sudo mkdir -p /opt/pihole
-  echo "somepassword" | sudo tee /opt/pihole/ph_password
-  sudo chmod 600 /opt/pihole/ph_password
-  
-  # Execute playbook via ansible
-  ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
-  
-  # See Playbook Summary output for Pihole WebUI URL and Wireguard Client files
-  ```
-  
-  * **Optional**: At the `# Set Variables` step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality). You can do this by adding the line `wireguard_hostname=[your personal DDNS address]`
-  * Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
+Follow the local deployment, raspbian guide here: https://github.com/chadgeary/cloudblock/tree/master/playbooks#raspbian-deployment, for support join their [Discord](https://discord.gg/zmu6GVnPnj), and check out the [video tutorial](https://youtu.be/9oeQZvltWDc):
+
+```bash
+# Ansible + Git
+sudo apt update && sudo apt -y upgrade
+sudo apt install git python3-pip
+pip3 install --user --upgrade ansible
+
+# Add .local/bin to $PATH
+echo PATH="\$PATH:~/.local/bin" >> .bashrc
+source ~/.bashrc
+
+# Install the community ansible collection
+ansible-galaxy collection install community.general
+
+# Optionally, reboot the raspberry pi
+# This may be required if the system was months out date before installing updates!
+sudo reboot
+
+# Clone the cloudblock project and change to playbooks directory
+git clone https://github.com/chadgeary/cloudblock && cd cloudblock/playbooks/
+
+# Set Variables
+doh_provider=opendns
+dns_novpn=1
+wireguard_peers=10
+vpn_traffic=dns
+docker_network=172.18.0.0
+docker_gw=172.18.0.1
+docker_doh=172.18.0.2
+docker_pihole=172.18.0.3
+docker_wireguard=172.18.0.4
+docker_webproxy=172.18.0.5
+wireguard_network=172.19.0.0
+
+# Optional (e.g. your DDNS hostname)
+wireguard_hostname=example.com
+
+# Want to set your own pihole password instead of something randomly generated?
+sudo mkdir -p /opt/pihole
+echo "somepassword" | sudo tee /opt/pihole/ph_password
+sudo chmod 600 /opt/pihole/ph_password
+
+# Execute playbook via ansible
+ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
+
+# See Playbook Summary output for Pihole WebUI URL and Wireguard Client files
+```
+
+* **Optional**: At the `# Set Variables` step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality). You can do this by adding the line `wireguard_hostname=[your personal DDNS address]`
+* Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
 
 - After ansible completes, **take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files**. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
