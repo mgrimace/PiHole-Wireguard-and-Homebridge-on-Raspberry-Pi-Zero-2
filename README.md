@@ -11,11 +11,8 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 2. [Build Pi Zero 2](#Build-Pi-Zero-2)
 3. [Setup the Pi](#Setup-the-Pi)
 4. [Install Cloudblock](#Install-Cloudblock)
-5. [Post-install PiHole setup](#PiHole-setup)
-6. [Pihole addons](#Pihole-Addons)
-   1. Easily add adlists and whitelists
-   2. Set up apps that use PiHole API token
-   3. Use the list tool to check which lists you're actually using
+5. [Router setup](#Router-setup)
+6. [Useful Pihole addons](#Useful-Pihole-Addons)
 7. [Install HomeBridge](#Install-HomeBridge)
 8. [Post-install HomeBridge setup](#HomeBridge-setup)
 9. [Updating Pihole and Homebridge](#Updating-the-apps)
@@ -124,11 +121,59 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
 
 # Install Cloudblock
 
-* Follow the local deployment, raspbian guide here: https://github.com/chadgeary/cloudblock/tree/master/playbooks#raspbian-deployment, for support join their [Discord](https://discord.gg/zmu6GVnPnj), and check out the [video tutorial](https://youtu.be/9oeQZvltWDc)
-  * At the #Set Variables step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality)
+* Follow the local deployment, raspbian guide here: https://github.com/chadgeary/cloudblock/tree/master/playbooks#raspbian-deployment, for support join their [Discord](https://discord.gg/zmu6GVnPnj), and check out the [video tutorial](https://youtu.be/9oeQZvltWDc):
+  
+* ```bash
+  # Ansible + Git
+  sudo apt update && sudo apt -y upgrade
+  sudo apt install git python3-pip
+  pip3 install --user --upgrade ansible
+  
+  # Add .local/bin to $PATH
+  echo PATH="\$PATH:~/.local/bin" >> .bashrc
+  source ~/.bashrc
+  
+  # Install the community ansible collection
+  ansible-galaxy collection install community.general
+  
+  # Optionally, reboot the raspberry pi
+  # This may be required if the system was months out date before installing updates!
+  sudo reboot
+  
+  # Clone the cloudblock project and change to playbooks directory
+  git clone https://github.com/chadgeary/cloudblock && cd cloudblock/playbooks/
+  
+  # Set Variables
+  doh_provider=opendns
+  dns_novpn=1
+  wireguard_peers=10
+  vpn_traffic=dns
+  docker_network=172.18.0.0
+  docker_gw=172.18.0.1
+  docker_doh=172.18.0.2
+  docker_pihole=172.18.0.3
+  docker_wireguard=172.18.0.4
+  docker_webproxy=172.18.0.5
+  wireguard_network=172.19.0.0
+  
+  # Optional (e.g. your DDNS hostname)
+  wireguard_hostname=example.com
+  
+  # Want to set your own pihole password instead of something randomly generated?
+  sudo mkdir -p /opt/pihole
+  echo "somepassword" | sudo tee /opt/pihole/ph_password
+  sudo chmod 600 /opt/pihole/ph_password
+  
+  # Execute playbook via ansible
+  ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
+  
+  # See Playbook Summary output for Pihole WebUI URL and Wireguard Client files
+  ```
+  
+  * **Optional**: At the `# Set Variables` step, add your DDNS url if you have one (I got this from my router settings, but not all routers have this functionality). You can do this by adding the line `wireguard_hostname=[your personal DDNS address]`
   * Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
 
-- After ansible completes, take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
+- After ansible completes, **take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files**. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
 - Use the Wireguard QR codes to setup your mobile devices. I set the profiles to *on-demand* except when connected to my home wifi SSID. That means that as soon as I leave home, Wireguard will connect remotely to continue ad-blocking.
 - To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
 - For example, I saved them to a folder called pihole_configs in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
@@ -160,14 +205,13 @@ sudo bash -c 'ip link set wlan0 down && ip link set wlan0 up' &
 * If you reboot by pulling the power cord or by losing power, Cloublock and Wireguard to do not seem to startup properly. To fix this, use `sudo reboot` and it should start back up. 
 * After updating the Raspberry Pi and/or rebooting, I ran into an issue where everything was working (e.g., PiHole, etc.) but my devices were not able to access the internet. This is an issue with cloudflared_doh (see this [issues](https://github.com/cloudflare/cloudflared/issues/23#issuecomment-1161211222) thread), and restarting it manually fixed the problem. To do so, use: `sudo docker restart cloudflared_doh`. However, I have now added an additional step above to hopefully prevent this from happening.
 
-# PiHole setup
+# Router setup
 
 - Go to your router settings, note these steps depend entirely on your own router model 
-
 - Forward port 51820 to your Pi's local IP address to enable Wireguard to work properly
 - Set your primary DNS in your DHCP server settings to your Pi's local IP. **Leave the secondary DNS blank.** 
 
-# Pihole Addons
+# Useful Pihole Addons
 
 ## Easily add adlists and whitelists
 
@@ -190,6 +234,8 @@ The [Pihole Adlist Tool](https://github.com/yubiuser/pihole_adlist_tool) is a sc
 ```
 
 Then follow the prompts, noting that it may take some time to run. **Note** that you might want to check for the latest release of the tool, as v2.6.3 might be out of date when you read this.
+
+If PiHole is all you wanted, then you can stop here. If you're interested in also adding HomeBridge read on!
 
 # Install HomeBridge
 
