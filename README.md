@@ -61,6 +61,8 @@ For this project, I won't be using the adapters or the header strip.
 - Your Pi will automatically connect to your wifi. For me, the easiest way to find the Raspberry Pi's IP address was to look for it on my network using my router's app
 - **(Recommended) Set a static IP for the Pi** I used my wireless router settings to reserve its IP address (i.e., so the Pi doesn't change its IP on me)
 - Open Terminal and connect to it remotely by using SSH. To do so type or copy/paste `ssh pi@rasberrypi.local`. If you changed your Pi username, replace `pi` with `username`. If you selected allow public-key authentication only, you shouldn't have to use a password to connect.
+- **Additional troubleshooting step if you've re-flashed the SD card (e.g., setting it up again from scratch):**
+- Use `ssh-keygen -R raspberrypi.local` If you are re-creating your SD card using your previous/existing keys you may get a scary-looking error when you try and connect via SSH. This command will delete your previous, unique fingerprint and generate a new one to fix this error. If you do so, run this on your home machine prior to ssh.
 
 ## Increase the Pi's memory
 
@@ -255,7 +257,7 @@ If PiHole is all you wanted, then you can stop here. If you're interested in als
   version: '2'
   services:
     homebridge:
-      image: oznu/homebridge:ubuntu
+      image: oznu/homebridge:latest
       container_name: homebridge
       restart: always
       network_mode: host
@@ -268,6 +270,9 @@ If PiHole is all you wanted, then you can stop here. If you're interested in als
 * After pasting, press `control+x` to exit, `y` to save, then `enter` to confirm without changing the file name
 
 * Then run `sudo docker-compose up -d` to install Homebridge from the Docker Compose file. 
+
+* If `sudo docker-compose up -d` results in an error try running `sudo docker-compose pull` first
+
 
 # HomeBridge setup
 
@@ -329,8 +334,8 @@ These are some useful commands I've come across in my learning and testing
 
 - `sudo docker exec pihole pihole updateGravity` update gravity database 
 - `sudo  reboot` #to reboot pi
-- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too high (>55 C).
-- `ssh-keygen -R raspberrypi.local` #If re-create your SD card using your previous/existing keys, you’ll have to delete your fingerprint using this command and generate a new one. If you do so, run this on your home machine prior to ssh.
+- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too hig
+- h (>55 C).
 - `sudo docker ps` #this will show you what docker containers are running. 
 - `sudo docker system prune -a -f` #If there were errors/issues during the setup, this will tidy up half-installed, empty, incomplete docker containers. Useful to run after a few updates.
 
