@@ -241,6 +241,24 @@ Then follow the prompts, noting that it may take some time to run. **Note** that
 
 If PiHole is all you wanted, then you can stop here. If you're interested in also adding HomeBridge read on!
 
+## Gravity Sync
+
+Use [Gravity Sync](https://github.com/vmstan/gravity-sync) to sync lists with a secondary Pi-Hole
+
+First, you'll need to set a password for user Pi if you don't already have one using:
+
+```bash
+sudo passwd pi
+```
+
+Then run the installation script, you'll be prompted for your secondary Pi's IP address, and the username (e.g., root) and password of the system on which it is installed.
+
+```bash
+curl -sSL https://raw.githubusercontent.com/vmstan/gs-install/main/gs-install.sh | bash
+```
+
+I use `gravity-sync push` to push my lists from Cloudblock over to the new, secondary Pi. 
+
 # Install HomeBridge
 
 * Install Docker Compose `sudo apt-get -y install docker-compose`
