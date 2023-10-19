@@ -45,7 +45,7 @@ For this project, I won't be using the adapters or the header strip.
 * I selected Raspberry Pi OS **Lite 64-bit (legacy)** by going to "other" section. 
   * **Lite:** we don't need a desktop environment
   * **Legacy**: Bullseye (legacy) is presently required for cloudblock, and it looks like gravity-sync as well.
-  * **32 vs 65:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. However, some things like cloudflare are dropping 32-bit support. Hence, I switched to a 64-bit build for longer-term stability.
+  * **32 vs 64:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. However, some things like cloudflare are dropping 32-bit support. Hence, I switched to a 64-bit build for longer-term stability.
   
 * Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only
@@ -338,8 +338,7 @@ These are some useful commands I've come across in my learning and testing
 
 - `sudo docker exec pihole pihole updateGravity` update gravity database 
 - `sudo  reboot` #to reboot pi
-- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too hig
-- h (>55 C).
+- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too high (>55 C).
 - `sudo docker ps` #this will show you what docker containers are running. 
 - `sudo docker system prune -a -f` #If there were errors/issues during the setup, this will tidy up half-installed, empty, incomplete docker containers. Useful to run after a few updates.
 
