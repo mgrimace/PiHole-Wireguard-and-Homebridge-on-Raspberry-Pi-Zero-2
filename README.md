@@ -1,7 +1,11 @@
 # PiHole-Wireguard-and-Homebridge-on-Raspberry-Pi-Zero-2
-These are my install notes for setting up [Cloudblock](https://github.com/chadgeary/cloudblock) and [Homebridge](https://homebridge.io) docker containers on my new Raspberry Pi Zero 2w. Please feel free to contribute notes, suggestions, clarifications, etc. 
+**Update, added ODOH and DNSCrypt:** Removed cloudblock, and added [dnscrypt-proxy](https://github.com/DNSCrypt/dnscrypt-proxy) to enable Oblivious-DNS-Over-HTTPS (ODoH) via DNSCrypt. In brief, DNS requests are now sent encrypted to an 'oblivious' relay, which then sends *anonymized* DNS requests to the resolver. 
 
-**Cloudblock** combines PiHole (adblock) for local ad-blocking (i.e., whole-home adblocking), wireguard for remote ad-blocking (i.e., out-of-home ad-blocking; using split-tunnel DNS over VPN) and cloudflared (DNS over HTTPS) all in docker containers.
+------
+
+These are my install notes for setting up Pi-Hole, PiVPN, and Homebridge on my new Raspberry Pi Zero 2w. Please feel free to contribute notes, suggestions, clarifications, etc. 
+
+**Pi-Hole** provides DNS-based adblocking. This setup will block ads and telemetry on all devices in the home, and specific devices on-the-go using Wireguard.
 
 **Homebridge** allows my home to recognize my assorted smart devices as HomeKit compatible. With this setup I can access both PiHole and Homebridge on my local network or out-of-home. 
 
@@ -9,12 +13,13 @@ These are my install notes for setting up [Cloudblock](https://github.com/chadge
 
 1. [Equipment](#Equipment)
 2. [Build Pi Zero 2](#Build-Pi-Zero-2)
-3. [Setup the Pi](#Setup-the-Pi)
-4. [Install Cloudblock](#Install-Cloudblock)
-5. [Router setup](#Router-setup)
-6. [Useful Pihole addons](#Useful-Pihole-Addons)
-7. [Install HomeBridge](#Homebridge.md)
-10. [Useful commands](#Useful-commands)
+3. [Setup the Pi](#Setup-the-Pi) - add ZRAM and over/unclocking 
+4. [Install Pi-Hole](#Install-Pi-Hole)
+5. [Install PiVPN](#Install-PiVPN)
+6. [Install DNSCrypt](#Install-DNScrypt) - customize the config for ODOH
+7. [Router setup](#Router-setup)
+8. [Useful Pihole addons](#Useful-Pihole-Addons)
+9. [Install HomeBridge](#Homebridge.md)
 11. [Support this project](#Support-this-project)
 
 # Equipment
@@ -42,10 +47,10 @@ For this project, I won't be using the adapters or the header strip.
 ## Get the SD card ready
 
 * Go to [raspberrypi.com](raspberrypi.com) and download and install the Raspberry Pi Imager. I'm using a Mac for this install
-* I selected Raspberry Pi OS **Lite 64-bit (legacy)** by going to "other" section. 
+* I selected Raspberry Pi OS **Lite 32-bit (legacy)** by going to "other" section. 
   * **Lite:** we don't need a desktop environment
   * **Legacy**: Bullseye (legacy) is presently required for cloudblock, and it looks like gravity-sync as well.
-  * **32 vs 65:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. However, some things like cloudflare are dropping 32-bit support. Hence, I switched to a 64-bit build for longer-term stability.
+  * **32 vs 64:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. 
   
 * Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only
@@ -153,62 +158,17 @@ sdram_freq=400
 
 - This will allow you to connect to your Pi in Terminal by just using `ssh [username]@[raspberry pi ip]`. If you skip this step, you'll need to specify the name of your key file every time you connect, as in: `ssh -i ~/.ssh/[key name] [username]@raspberry pi ip]`
 
-# Install Cloudblock
+# Install Pi-Hole
 
-Follow the local deployment, raspbian guide here: https://github.com/chadgeary/cloudblock/tree/master/playbooks#raspbian-deployment, for support join their [Discord](https://discord.gg/zmu6GVnPnj), and check out the [video tutorial](https://youtu.be/9oeQZvltWDc):
+- The most up-to-date Pi-Hole installation instructions can be found here: https://docs.pi-hole.net/main/basic-install
+- Otherwise, go ahead and use the official install script: `curl -sSL https://install.pi-hole.net | bash`
 
-```bash
-# Ansible + Git
-sudo apt update && sudo apt -y upgrade
-sudo apt install git python3-pip
-pip3 install --user --upgrade ansible 
-# if you get an error installing ansible, you may need to run the following line without the #
-# sudo rm -rf /usr/lib/python3.11/EXTERNALLY-MANAGED
+# Install PiVPN
 
-# Add .local/bin to $PATH
-echo PATH="\$PATH:~/.local/bin" >> .bashrc
-source ~/.bashrc
+- The most up-to-date PiPVN instructions can be found here: https://www.pivpn.io
+- Otherwise, go ahead and use the official install script: `curl -L https://install.pivpn.io | bash`
 
-# Install the community ansible collection
-ansible-galaxy collection install community.general
-
-# Optionally, reboot the raspberry pi
-# This may be required if the system was months out date before installing updates!
-sudo reboot
-
-# Clone the cloudblock project and change to playbooks directory
-git clone https://github.com/chadgeary/cloudblock && cd cloudblock/playbooks/
-
-# Set Variables
-doh_provider=opendns
-dns_novpn=1
-wireguard_peers=10
-vpn_traffic=dns
-docker_network=172.18.0.0
-docker_gw=172.18.0.1
-docker_doh=172.18.0.2
-docker_pihole=172.18.0.3
-docker_wireguard=172.18.0.4
-docker_webproxy=172.18.0.5
-wireguard_network=172.19.0.0
-
-# Optional (e.g. your DDNS hostname)
-wireguard_hostname=example.com
-
-# Want to set your own pihole password instead of something randomly generated?
-sudo mkdir -p /opt/pihole
-echo "somepassword" | sudo tee /opt/pihole/ph_password
-sudo chmod 600 /opt/pihole/ph_password
-
-# Execute playbook via ansible
-ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
-
-# See Playbook Summary output for Pihole WebUI URL and Wireguard Client files
-```
-
-* Note, if you did not manually specify a password for the PiHole admin page, you'll need to use `sudo cat /opt/pihole/ph_password` afterwards running ansible to see the password you generated
-
-- After ansible completes, **take note of the final output which includes your local and remote PiHole IP addresses, and Wireguard config files**. The PiHole IPs will allow you to connect to your PiHole admin portal at home and out-of-home. I made a separate bookmark for each (e.g. PiHole - Home, PiHole - Remote). 
+**Note:** if you have a dynamic dns (DDNS) address, when PiVPN asks you if you want to use an IP or a DNS address, select DNS and enter the domain here.
 
 ## Setup devices with Wireguard profiles
 
@@ -216,32 +176,60 @@ ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provide
 - To download the Wireguard config files to your computer, use the following secure-copy commands. Make sure you are *not* connected by SSH when running this on your home computer: `scp -r pi@raspberrypi.local:/opt/wireguard/peer*/ [destination on home computer]`
 - For example, I saved them to a folder called pihole_configs in My Documents using: `scp -r 'pi@raspberrypi.local:/opt/wireguard/peer*' ~/Documents/pihole_configs`
 
-## Important step to prevent a non-working loop
+# Install DNScrypt
 
-Since the Raspberry Pi's DHCP server (my router) points to the PiHole container for DNS, I need to ensure that the Raspberry Pi's host DNS is not set via DHCP (i.e., set to itself, thus creating a non-working loop). This happened to me after rebooting the Pi, after which all the containers were working but my devices did not have internet. To do so, follow these steps: https://github.com/chadgeary/cloudblock/tree/master/playbooks#faqs	
+- Refer to this [guide](https://github.com/SwaroopGiri/Pihole-with-Anonymized-ODOH), or proceed making sure to update the links to the most recent release from the main repo [here](https://github.com/DNSCrypt/dnscrypt-proxy/releases).
+- Install DNSCrypt-proxy, and add the configuration file:
 
 ```bash
-# If the Raspberry Pi's DHCP server points to the Pihole container, ensure the Raspberry Pi's host DNS is not set via DHCP, e.g.:
-# backup DHCP client conf
-sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.$(date +%F_%T)
+cd /opt
 
-# Disable DNS via DHCP
-sudo sed -i 's/option domain_name_servers, domain_name, domain_search, host_name/option domain_name, domain_search, host_name/' /etc/dhcpcd.conf
+sudo wget https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/2.1.5/dnscrypt-proxy-linux_arm-2.1.5.tar.gz
 
-# Set a hardcoded DNS server IP - replace 1.1.1.1 with your choice of DNS.
-sudo sed -i '0,/#static domain_name_servers=.*/s//static domain_name_servers=1.1.1.1/' /etc/dhcpcd.conf
-
-# if Raspberry Pi is wireless, disconnect/reconnect link
-sudo bash -c 'ip link set wlan0 down && ip link set wlan0 up' &
+sudo tar -xf dnscrypt-proxy-linux_arm-2.1.5.tar.gz
+sudo mv linux-arm dnscrypt-proxy && cd dnscrypt-proxy
+sudo cp example-dnscrypt-proxy.toml dnscrypt-proxy.toml
+sudo nano dnscrypt-proxy.toml
 ```
 
+- This will open a text-editor with the example configuration file, which you can customize for your setup
+- Here is mine already set to use ODOH: [dnscrypt-proxy.toml](dnscrypt-proxy.toml)
+- Save any changes to the file: `CTRL + X then Y and Enter`
+- Then start the service:
 
+```bash
+sudo ./dnscrypt-proxy -service install
+sudo ./dnscrypt-proxy -service start
+sudo systemctl status dnscrypt-proxy
+```
 
-## Troubleshooting Cloudblock setup
+- Test the service with `./dnscrypt-proxy -resolve www.google.com`, you should get something like:
 
-* If you are using regular swap: every time you re-run ansible (e.g., for updates), you'll need to re-paste the variables, and use `sudo swapon /opt/swap.file` to turn on the swap to avoid errors prior to running `ansible-playbook...`
-* If you reboot by pulling the power cord or by losing power, Cloublock and Wireguard to do not seem to startup properly. To fix this, use `sudo reboot` and it should start back up. 
-* After updating the Raspberry Pi and/or rebooting, I ran into an issue where everything was working (e.g., PiHole, etc.) but my devices were not able to access the internet. This is an issue with cloudflared_doh (see this [issues](https://github.com/cloudflare/cloudflared/issues/23#issuecomment-1161211222) thread), and restarting it manually fixed the problem. To do so, use: `sudo docker restart cloudflared_doh`. However, I have now added an additional step above to hopefully prevent this from happening.
+```bash
+Resolving [www.google.com] using 127.0.0.1 port 5350
+
+Resolver      : 172.69.207.24
+
+Canonical name: www.google.com.
+
+IPv4 addresses: 142.251.32.68
+IPv6 addresses: 2607:f8b0:400b:807::2004
+
+Name servers  : no name servers found
+DNSSEC signed : no
+Mail servers  : no mail servers found
+
+HTTPS alias   : -
+HTTPS info    : [alpn]=[h2,h3]
+
+Host info     : -
+```
+
+## Set-up Pi-Hole for DNScrypt-proxy
+
+- Login to Pi-hole web interface, Goto settings / DNS / Select Custom 1 (IPv4) and enter: `127.0.0.1#5350`. Select Custom 3 (IPv6) and enter `::1#5350`.
+- Uncheck everything else in Upstream DNS Servers section.
+- Reboot the Pi via `sudo reboot`
 
 # Router setup
 
@@ -293,55 +281,9 @@ curl -sSL https://raw.githubusercontent.com/vmstan/gs-install/main/gs-install.sh
 
 I use `gravity-sync push` to push my lists from Cloudblock over to the new, secondary Pi. 
 
-# Updating the app
-
-- Be sure to run `sudo apt update && sudo apt -y upgrade` first to update your Raspberry Pi. `sudo reboot`
-- Then, remove your Pi-Hole's DNS from your router settings (so you still temporarily still have internet once you remove the old containers). 
-- Then run the following:
-
-```bash
-# Be in the cloudblock/playbooks directory
-cd ~/cloudblock/playbooks
-
-# Pull cloudblock code updates
-git pull
-
-# Set customized variables
-doh_provider=opendns
-dns_novpn=1
-wireguard_peers=10
-vpn_traffic=dns
-docker_network=172.18.0.0
-docker_gw=172.18.0.1
-docker_doh=172.18.0.2
-docker_pihole=172.18.0.3
-docker_wireguard=172.18.0.4
-docker_webproxy=172.18.0.5
-wireguard_network=172.19.0.0
-
-# Remove old containers (service is down until Ansible completes)
-sudo docker rm -f cloudflared_doh pihole web_proxy wireguard
-
-# Rerun ansible-playbook
-ansible-playbook cloudblock_raspbian.yml --extra-vars="doh_provider=$doh_provider dns_novpn=$dns_novpn wireguard_peers=$wireguard_peers vpn_traffic=$vpn_traffic docker_network=$docker_network docker_gw=$docker_gw docker_doh=$docker_doh docker_pihole=$docker_pihole docker_wireguard=$docker_wireguard docker_webproxy=$docker_webproxy wireguard_network=$wireguard_network wireguard_hostname=$wireguard_hostname"
-```
-
-Once Pi-Hole is successfullly updated, you can re-enter it's IP to your router's DNS settings (I do this in DHCP)
-
 # Next
 
 [Install Homebridge](Homebridge.md)
-
-# Useful commands
-
-These are some useful commands I've come across in my learning and testing
-
-- `sudo docker exec pihole pihole updateGravity` update gravity database 
-- `sudo  reboot` #to reboot pi
-- `/usr/bin/vcgencmd measure_temp` #to quickly check temp. I find `sudo reboot` and running scripts can stall/freeze if the temp is too hig
-- h (>55 C).
-- `sudo docker ps` #this will show you what docker containers are running. 
-- `sudo docker system prune -a -f` #If there were errors/issues during the setup, this will tidy up half-installed, empty, incomplete docker containers. Useful to run after a few updates.
 
 # Support this project
 
