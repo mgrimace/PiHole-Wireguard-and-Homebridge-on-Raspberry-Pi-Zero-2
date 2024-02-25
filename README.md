@@ -18,7 +18,7 @@ These are my install notes for setting up Pi-Hole, PiVPN, and Homebridge on my n
 5. [Install PiVPN](#Install-PiVPN)
 6. [Install DNSCrypt](#Install-DNScrypt) - customize the config for ODOH
 7. [Router setup](#Router-setup)
-8. [Useful Pihole addons](#Useful-Pihole-Addons)
+8. [Useful Pihole addons](#Useful-Pihole-Addons) - add lists, sync multiple pi-holes, check which lists are being used
 9. [Install HomeBridge](#Homebridge.md)
 11. [Support this project](#Support-this-project)
 
@@ -50,8 +50,7 @@ For this project, I won't be using the adapters or the header strip.
 * I selected Raspberry Pi OS **Lite 32-bit (legacy)** by going to "other" section. 
   * **Lite:** we don't need a desktop environment
   * **Legacy**: Bullseye (legacy) is presently required for cloudblock, and it looks like gravity-sync as well.
-  * **32 vs 64:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. 
-  
+  * **32 vs 64:** There's an exceptionally detailed techincal writeup on the Pi Zero 2 [here](https://github.com/ThomasKaiser/Knowledge/blob/master/articles/Quick_Review_of_RPi_Zero_2_W.md) that suggests 32-bit systems are more memory efficient on a memory-limited system such as this. However, some things like cloudflare are dropping 32-bit support. Hence, I switched to a 64-bit build for longer-term stability.
 * Before continuing, select advanced options:
   * **Enable SSH**: I selected *allow public-key authenitcation* only
   * You can leave the default/prefilled option for set authorized_keys for 'pi'. This automatically creates the required authorization keys. That means I don't have to use a password when connecting to my Pi from this computer
