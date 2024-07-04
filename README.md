@@ -74,7 +74,7 @@ For this project, I won't be using the adapters or the header strip.
 
 Prior to running ansible as part of installing Cloudblock, we need to increase the available memory or we run into errors during the install process due to limited free memory on the Pi Zero 2. There are two ways to do this, I've tested both and I'm using ZRam currently:
 
-### Option 1 - enable ZRam
+### enable ZRam
 
 - [Zram](https://www.kernel.org/doc/Documentation/blockdev/zram.txt**) creates compressed RAM based block storage. This compression allows additional memory inside RAM in exchange for the processing power used for compression. This has the benefit of being faster than using the SD card for swap memory.
 - To enable, use `sudo apt install zram-tools` 
@@ -94,17 +94,6 @@ Prior to running ansible as part of installing Cloudblock, we need to increase t
     ```bash
     sudo sysctl --system
     ```
-
-### Option 2 - increase the swap memory
-
-- Increasing the swap memory designates a portion of the SD card to act as memory. Using the SD card as memory is slow but reliable. To increase the swap memory:
-
-- ```bash
-  sudo dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
-  sudo mkswap /opt/swap.file
-  sudo chmod 600 /opt/swap.file
-  sudo swapon /opt/swap.file
-  ```
 
 ## (Optional) Overclock the Pi
 
@@ -133,8 +122,6 @@ arm_freq=600
 gpu_freq=300
 sdram_freq=400
 ```
-
-
 
 ## (Optional) Add another device that can log-in to the Pi
 
@@ -168,6 +155,13 @@ sdram_freq=400
 - Otherwise, go ahead and use the official install script: `curl -L https://install.pivpn.io | bash`
 
 **Note:** if you have a dynamic dns (DDNS) address, when PiVPN asks you if you want to use an IP or a DNS address, select DNS and enter the domain here.
+
+## Set up Wireguard for split-tunnel VPN, then begin adding devices
+
+- First, we want to change the default settings for Wireguard that are used to create the device configs.
+- I set this up as 'split-tunnel' meaning that I only send DNS and not *all* my data through my Pi. I also add my home network so when I'm on the VPN, I can access the services in my home server.
+- edit the PiVPN configuration with: `sudo nano /etc/pivpn/wireguard/setupVars.conf`. Change the `AllowedIPs` line to = the IP/32 above under DNS (which is your Pi-Hole DNS address), and optionally, add your home gateway (e.g., 192.168.68.0/24) 
+- Then use `pivpn add` to create a new device config (e.g., `iphone`) and `pivpn qr` to display the qr cod
 
 ## Setup devices with Wireguard profiles
 
