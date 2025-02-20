@@ -17,9 +17,10 @@ These are my install notes for setting up Pi-Hole, PiVPN, and Homebridge on my n
 4. [Install Pi-Hole](#Install-Pi-Hole)
 5. [Install PiVPN](#Install-PiVPN)
 6. [Install DNSCrypt](#Install-DNScrypt) - customize the config for ODOH
-7. [Router setup](#Router-setup)
-8. [Useful Pihole addons](#Useful-Pihole-Addons) - add lists, sync multiple pi-holes, check which lists are being used
-9. [Install HomeBridge](#Homebridge.md)
+7. ['Hardcode' DNS into Pi](#Hardcode-DNS) - Optional troubleshooting step to avoid the Pi pointing to Pi-hole on itself for DNS, potentially creating a non-working loop
+8. [Router setup](#Router-setup)
+9. [Useful Pihole addons](#Useful-Pihole-Addons) - add lists, sync multiple pi-holes, check which lists are being used
+10. [Install HomeBridge](#Homebridge.md)
 11. [Support this project](#Support-this-project)
 
 # Equipment
@@ -223,6 +224,19 @@ Host info     : -
 - Login to Pi-hole web interface, Goto settings / DNS / Select Custom 1 (IPv4) and enter: `127.0.0.1#5350`. Select Custom 3 (IPv6) and enter `::1#5350`.
 - Uncheck everything else in Upstream DNS Servers section.
 - Reboot the Pi via `sudo reboot`
+
+# Hardcode DNS
+- If the Pi is using DHCP and receiving the Pihole's IP (itself) for its DNS, it can in some circumstances (e.g., Pihole down) create a non-working loop.
+
+## Set a 'hard-coded' DNS specifically for the Raspberry Pi
+- check the current DNS using `cat /etc/resolv.conf` - you'll likely see Pi-Hole's IP as your primary IP.
+- use `nmcli device status` to identify the name(s) of your connections. Mine is called `Wired`
+- Since, I'm using `Wired`, the following will tell the wired connection to ignore DNS from the DHCP (my router), and instead use cloudflare at 1.1.1.1 (you can specify whatever you prefer here):
+```bash
+sudo nmcli con mod "Wired" ipv4.dns "1.1.1.1" ipv4.ignore-auto-dns yes
+sudo systemctl restart NetworkManager
+nmcli dev show eth0
+```
 
 # Router setup
 
