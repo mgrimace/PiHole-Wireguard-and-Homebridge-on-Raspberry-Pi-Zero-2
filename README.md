@@ -1,4 +1,7 @@
 # PiHole-Wireguard-and-Homebridge-on-Raspberry-Pi-Zero-2
+
+>Newer, simpler docker version available! https://github.com/mgrimace/wirehole-ui-odoh
+
 **Update, added ODOH and DNSCrypt:** Removed cloudblock, and added [dnscrypt-proxy](https://github.com/DNSCrypt/dnscrypt-proxy) to enable Oblivious-DNS-Over-HTTPS (ODoH) via DNSCrypt. In brief, DNS requests are now sent encrypted to an 'oblivious' relay, which then sends *anonymized* DNS requests to the resolver. 
 
 ------
